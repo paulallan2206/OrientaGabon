@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrientaGabon — Trouve ta voie</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #0a3d1f;
+    --green-mid: #1a6b3a;
+    --green-bright: #2eb85c;
+    --gold: #f5c518;
+    --gold-light: #fde97a;
+    --cream: #faf7f0;
+    --white: #ffffff;
+    --dark: #0d0d0d;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --shadow: 0 20px 60px rgba(10,61,31,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--green-deep);
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px 80px;
+    text-align: center;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 50%, rgba(46,184,92,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 30%, rgba(245,197,24,0.10) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(245,197,24,0.15);
+    border: 1px solid rgba(245,197,24,0.4);
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 8vw, 80px);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1.05;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+
+  .hero h1 span {
+    color: var(--gold);
+    display: block;
+  }
+
+  .hero p {
+    color: rgba(255,255,255,0.65);
+    font-size: 17px;
+    font-weight: 300;
+    max-width: 520px;
+    margin: 20px auto 0;
+    line-height: 1.7;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 48px;
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    background: var(--green-deep);
+    padding: 0 40px 32px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .progress-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .step-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  .step-dot.done { background: var(--gold); color: var(--green-deep); }
+  .step-dot.active { background: var(--green-bright); color: white; box-shadow: 0 0 0 4px rgba(46,184,92,0.3); }
+  .step-dot.pending { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+
+  .step-line {
+    flex: 1; height: 2px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .step-line-fill { height: 100%; background: var(--gold); transition: width 0.5s ease; width: 0; }
+  .step-line-fill.done { width: 100%; }
+
+  /* ── MAIN CONTAINER ── */
+  .main { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.5s ease both;
+    display: none;
+  }
+  .card.active { display: block; }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 8px;
+  }
+
+  .card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green-deep);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .card-desc {
+    color: var(--gray);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green-deep);
+    letter-spacing: 0.3px;
+  }
+
+  label span { color: var(--gray); font-weight: 400; font-size: 12px; }
+
+  input[type="number"], select {
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--dark);
+    background: var(--gray-light);
+    transition: all 0.2s ease;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="number"]:focus, select:focus {
+    border-color: var(--green-bright);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(46,184,92,0.1);
+  }
+
+  /* Note slider */
+  .note-field { display: flex; flex-direction: column; gap: 6px; }
+  .note-top { display: flex; justify-content: space-between; align-items: center; }
+  .note-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-bright);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--green-bright) var(--pct, 50%), #e5e7eb var(--pct, 50%));
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--green-deep);
+    border: 3px solid var(--green-bright);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  /* ── QUIZ CARDS ── */
+  .quiz-question {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--green-deep);
+    margin-bottom: 28px;
+    line-height: 1.4;
+  }
+
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .quiz-opt {
+    padding: 16px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dark);
+    background: var(--gray-light);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .quiz-opt:hover {
+    border-color: var(--green-bright);
+    background: rgba(46,184,92,0.05);
+    transform: translateY(-2px);
+  }
+
+  .quiz-opt.selected {
+    border-color: var(--green-bright);
+    background: rgba(46,184,92,0.08);
+    color: var(--green-deep);
+  }
+
+  .quiz-opt .opt-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: rgba(46,184,92,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .quiz-opt.selected .opt-icon { background: var(--green-bright); }
+
+  .quiz-progress {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 16px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 12px; margin-top: 36px; justify-content: space-between; align-items: center; }
+
+  .btn {
+    padding: 16px 36px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--green-deep);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--green-mid); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(10,61,31,0.25); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--gray);
+    border: 2px solid #e5e7eb;
+  }
+  .btn-secondary:hover { border-color: var(--green-bright); color: var(--green-deep); }
+
+  .btn-gold {
+    background: var(--gold);
+    color: var(--green-deep);
+    font-weight: 700;
+  }
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,197,24,0.4); }
+
+  /* ── RESULTS ── */
+  .result-header {
+    text-align: center;
+    padding-bottom: 36px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 36px;
+  }
+
+  .result-emoji { font-size: 56px; margin-bottom: 16px; display: block; }
+
+  .result-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--green-deep);
+    margin-bottom: 8px;
+  }
+
+  .result-header p { color: var(--gray); font-size: 15px; }
+
+  .recommendations { display: flex; flex-direction: column; gap: 16px; }
+
+  .reco-card {
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s ease;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .reco-card:hover { transform: translateX(4px); }
+
+  .reco-card.rank-1 {
+    background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
+    color: white;
+    box-shadow: 0 12px 32px rgba(10,61,31,0.2);
+  }
+  .reco-card.rank-2 { background: var(--gray-light); border: 2px solid #e5e7eb; }
+  .reco-card.rank-3 { background: var(--cream); border: 2px solid #e5e7eb; }
+
+  .reco-rank {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 900;
+    flex-shrink: 0;
+    width: 48px;
+  }
+  .rank-1 .reco-rank { color: var(--gold); }
+  .rank-2 .reco-rank { color: var(--green-mid); }
+  .rank-3 .reco-rank { color: var(--gray); }
+
+  .reco-info { flex: 1; }
+  .reco-name {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .rank-1 .reco-name { color: white; }
+
+  .reco-meta {
+    font-size: 13px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .rank-1 .reco-meta { color: rgba(255,255,255,0.7); }
+  .rank-2 .reco-meta, .rank-3 .reco-meta { color: var(--gray); }
+
+  .reco-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .rank-1 .reco-pct { color: var(--gold); }
+  .rank-2 .reco-pct { color: var(--green-bright); }
+  .rank-3 .reco-pct { color: var(--gray); }
+
+  .conf-bar-wrap { margin-top: 8px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+  .rank-2 .conf-bar-wrap, .rank-3 .conf-bar-wrap { background: #e5e7eb; }
+  .conf-bar { height: 100%; background: var(--gold); border-radius: 2px; transition: width 1s ease 0.3s; width: 0; }
+  .rank-2 .conf-bar { background: var(--green-bright); }
+  .rank-3 .conf-bar { background: var(--gray); }
+
+  .etablissements {
+    margin-top: 32px;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .etablissements h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--green-deep);
+    margin-bottom: 16px;
+  }
+
+  .etab-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .etab-tag {
+    padding: 6px 14px;
+    background: white;
+    border: 1px solid #d1fae5;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green-deep);
+  }
+
+  .profile-summary {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .summary-item {
+    background: var(--gray-light);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .summary-icon { font-size: 24px; margin-bottom: 6px; display: block; }
+  .summary-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+  .summary-value { font-size: 14px; font-weight: 600; color: var(--green-deep); margin-top: 2px; }
+
+  /* ── INTRO CARDS ── */
+  .intro-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .intro-opt {
+    padding: 28px 24px;
+    border: 2px solid #e5e7eb;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: var(--gray-light);
+  }
+
+  .intro-opt:hover {
+    border-color: var(--green-bright);
+    background: white;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(10,61,31,0.1);
+  }
+
+  .intro-opt-icon { font-size: 40px; margin-bottom: 12px; display: block; }
+  .intro-opt h3 { font-size: 16px; font-weight: 700; color: var(--green-deep); margin-bottom: 6px; }
+  .intro-opt p { font-size: 13px; color: var(--gray); line-height: 1.5; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--gray);
+    font-size: 13px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .footer strong { color: var(--green-deep); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .card { padding: 28px 20px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .quiz-options { grid-template-columns: 1fr; }
+    .intro-options { grid-template-columns: 1fr; }
+    .profile-summary { grid-template-columns: 1fr 1fr; }
+    .hero-stats { gap: 24px; }
+    .btn-row { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🇬🇦 Projet OrientaGabon</div>
+  <h1>Trouve <span>ta voie.</span></h1>
+  <p>Un outil d'orientation intelligent pour les lycéens gabonais, basé sur l'intelligence artificielle.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">20</span><span class="stat-label">Filières</span></div>
+    <div class="stat"><span class="stat-num">40+</span><span class="stat-label">Établissements</span></div>
+    <div class="stat"><span class="stat-num">IA</span><span class="stat-label">Random Forest</span></div>
+  </div>
+</section>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-bar" id="progressBar">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-line"><div class="step-line-fill" id="line1"></div></div>
+    <div class="step-dot pending" id="dot2">2</div>
+    <div class="step-line"><div class="step-line-fill" id="line2"></div></div>
+    <div class="step-dot pending" id="dot3">3</div>
+    <div class="step-line"><div class="step-line-fill" id="line3"></div></div>
+    <div class="step-dot pending" id="dot4">4</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ÉTAPE 1 : Choix du mode -->
+  <div class="card active" id="step1">
+    <div class="card-label">Étape 1 / 4</div>
+    <h2>Comment veux-tu démarrer ?</h2>
+    <p class="card-desc">Choisis la méthode qui te correspond le mieux. Les deux aboutissent aux mêmes recommandations.</p>
+    <div class="intro-options">
+      <div class="intro-opt" onclick="setMode('notes')">
+        <span class="intro-opt-icon">📝</span>
+        <h3>Formulaire de notes</h3>
+        <p>Saisis tes moyennes par matière et quelques préférences. Rapide et direct.</p>
+      </div>
+      <div class="intro-opt" onclick="setMode('quiz')">
+        <span class="intro-opt-icon">🎯</span>
+        <h3>Quiz interactif</h3>
+        <p>Réponds à une série de questions guidées sur ton profil et tes envies.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2A : Formulaire notes -->
+  <div class="card" id="step2a">
+    <div class="card-label">Étape 2 / 4 — Tes notes</div>
+    <h2>Tes moyennes scolaires</h2>
+    <p class="card-desc">Indique tes moyennes sur 20. Sois honnête — c'est pour mieux t'orienter !</p>
+    <div class="form-grid">
+      <div class="field">
+        <div class="note-field">
+          <div class="note-top"><label>Mathématiques</label><span class="note-value" id="val_maths">10</span></div>
+          <input type="range" min="0" max="20" step="0.5" value="10" id="note_maths" oninput="updateSlider(this,'val_maths')">
+        </div>
+      </div>
+      <div class="field">
+        <div class="note-field">
+          <div class="note-top"><label>Français</label><span class="note-value" id="val_francais">10</span></div>
+          <input type="range" min="0" max="20" step="0.5" value="10" id="note_francais" oninput="updateSlider(this,'val_francais')">
+        </div>
+      </div>
+      <div class="field">
+        <div class="note-field">
+          <div class="note-top"><label>Sciences <span>(SVT/Physique)</span></label><span class="note-value" id="val_sciences">10</span></div>
+          <input type="range" min="0" max="20" step="0.5" value="10" id="note_sciences" oninput="updateSlider(this,'val_sciences')">
+        </div>
+      </div>
+      <div class="field">
+        <div class="note-field">
+          <div class="note-top"><label>Économie / Gestion</label><span class="note-value" id="val_eco">10</span></div>
+          <input type="range" min="0" max="20" step="0.5" value="10" id="note_eco" oninput="updateSlider(this,'val_eco')">
+        </div>
+      </div>
+      <div class="field">
+        <div class="note-field">
+          <div class="note-top"><label>Histoire-Géographie</label><span class="note-value" id="val_histoire">10</span></div>
+          <input type="range" min="0" max="20" step="0.5" value="10" id="note_histoire" oninput="updateSlider(this,'val_histoire')">
+        </div>
+      </div>
+      <div class="field">
+        <div class="note-field">
+          <div class="note-top"><label>Anglais</label><span class="note-value" id="val_anglais">10</span></div>
+          <input type="range" min="0" max="20" step="0.5" value="10" id="note_anglais" oninput="updateSlider(this,'val_anglais')">
+        </div>
+      </div>
+      <div class="field full">
+        <label>Série de Bac</label>
+        <select id="serie_bac">
+          <option value="1">Série A — Lettres & Sciences Humaines</option>
+          <option value="2">Série C — Mathématiques & Sciences Physiques</option>
+          <option value="3">Série D — Sciences Naturelles</option>
+          <option value="4">Série G2 — Sciences de Gestion</option>
+          <option value="5">Série F — Technique & Technologie</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goTo('step1')">← Retour</button>
+      <button class="btn btn-primary" onclick="goTo('step3')">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2B : Quiz -->
+  <div class="card" id="step2b">
+    <div class="card-label">Étape 2 / 4 — Quiz</div>
+    <div id="quizContent"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="quizBack" onclick="quizPrev()">← Retour</button>
+      <button class="btn btn-primary" id="quizNext" onclick="quizNext()">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : Profil & secteur -->
+  <div class="card" id="step3">
+    <div class="card-label">Étape 3 / 4 — Ton profil</div>
+    <h2>Qui es-tu vraiment ?</h2>
+    <p class="card-desc">Ces deux questions aident le modèle IA à affiner ses recommandations.</p>
+
+    <div style="margin-bottom: 28px;">
+      <label style="display:block; margin-bottom:12px;">Ton profil de personnalité dominant</label>
+      <div class="quiz-options" id="profilGrid"></div>
+    </div>
+
+    <div>
+      <label style="display:block; margin-bottom:12px;">Ton secteur de préférence</label>
+      <div class="quiz-options" id="secteurGrid"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="step3back" onclick="step3Back()">← Retour</button>
+      <button class="btn btn-gold" onclick="predict()">✨ Analyser mon profil</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : Résultats -->
+  <div class="card" id="step4">
+    <div class="result-header">
+      <span class="result-emoji">🎓</span>
+      <h2 id="resultTitle">Tes filières recommandées</h2>
+      <p id="resultSub">Basé sur ton profil unique — modèle Random Forest OrientaGabon</p>
+    </div>
+
+    <div class="recommendations" id="recoList"></div>
+
+    <div class="etablissements" id="etablissementsBox">
+      <h3>🏫 Établissements au Gabon</h3>
+      <div class="etab-list" id="etablissementsList"></div>
+    </div>
+
+    <div class="profile-summary" id="profileSummary"></div>
+
+    <div class="btn-row" style="margin-top: 36px;">
+      <button class="btn btn-secondary" onclick="restart()">🔄 Recommencer</button>
+      <button class="btn btn-primary" onclick="share()">📤 Partager mes résultats</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>Fait avec ❤️ par <strong>Paul Allan Junior MEYE SIKA</strong> — OrientaGabon v1.0</p>
+  <p style="margin-top:6px; font-size:12px;">Licence 3 IA & Business · SUP'RH School of Management and Artificial Intelligence · Libreville, Gabon</p>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const FILIERES = {
+  1:  { name: "Droit & Sciences Économiques",       etabs: ["UOB - FDSE","INSG","IUSO","UFGSE","UCL"], duree:"3-5 ans", emoji:"⚖️" },
+  2:  { name: "Lettres, Langues & Sc. Humaines",    etabs: ["UOB - FLSH","ENS"], duree:"3-5 ans", emoji:"📚" },
+  3:  { name: "Sciences (Maths, Physique, SVT)",    etabs: ["UOB - Fac. Sciences","ENS","ENSET"], duree:"3-5 ans", emoji:"🔬" },
+  4:  { name: "Médecine & Santé",                   etabs: ["USS","Collège Médical","IMSIS"], duree:"6-7 ans", emoji:"🩺" },
+  5:  { name: "Génie Civil & Ingénierie",           etabs: ["EPM - USTM","ISI","UIPL","UPK"], duree:"3-5 ans", emoji:"🏗️" },
+  6:  { name: "Informatique & Technologies",        etabs: ["USTM","UESSIG","IST","ITA","ESTIM"], duree:"3 ans", emoji:"💻" },
+  7:  { name: "Gestion, Commerce & Finance",        etabs: ["INSG","IST","HECI","BBS","ESGEC","EM Gabon"], duree:"3 ans", emoji:"💼" },
+  8:  { name: "Management & Ressources Humaines",   etabs: ["INSG","AFRAM","AUM","IHEM","ESLD"], duree:"3 ans", emoji:"👥" },
+  9:  { name: "Marketing & Communication",          etabs: ["INSG","Sup de Com","EM Gabon","IST"], duree:"3 ans", emoji:"📣" },
+  10: { name: "Éducation & Formation",              etabs: ["ENS","ENSET","IUSO"], duree:"3-5 ans", emoji:"🎓" },
+  11: { name: "Géologie, Mines & Pétrole",          etabs: ["USTM","IPG"], duree:"3-5 ans", emoji:"⛏️" },
+  12: { name: "Agriculture & Agronomie",            etabs: ["INSAB"], duree:"3 ans", emoji:"🌾" },
+  13: { name: "Eaux, Forêts & Environnement",       etabs: ["ENEF","USTM"], duree:"3 ans", emoji:"🌿" },
+  14: { name: "Architecture & Urbanisme",           etabs: ["UIPL","UAS"], duree:"5 ans", emoji:"🏛️" },
+  15: { name: "Tourisme & Hôtellerie",              etabs: ["École Hôtelière de Libreville","INSG"], duree:"2-3 ans", emoji:"🏨" },
+  16: { name: "Logistique & Transport",             etabs: ["IST","ESM-Gabon","ITO"], duree:"3 ans", emoji:"🚢" },
+  17: { name: "Comptabilité & Expertise Comptable", etabs: ["ESGEC","INSG","IRTCF","IST"], duree:"3 ans", emoji:"📊" },
+  18: { name: "Sciences de l'Information",          etabs: ["IUSO","UOB - FLSH"], duree:"3 ans", emoji:"🗂️" },
+  19: { name: "Assistant de Direction",             etabs: ["IUSO","IST"], duree:"2-3 ans", emoji:"🗓️" },
+  20: { name: "Entrepreneuriat & Innovation",       etabs: ["IST","BBS","IHEEE","LIBS"], duree:"3 ans", emoji:"🚀" },
+};
+
+const PROFILS = [
+  { id:1,  name:"Analytique",        icon:"🧮" },
+  { id:2,  name:"Créatif",           icon:"🎨" },
+  { id:3,  name:"Leader",            icon:"🦁" },
+  { id:4,  name:"Empathique",        icon:"💙" },
+  { id:5,  name:"Curieux/Chercheur", icon:"🔍" },
+  { id:6,  name:"Communicant",       icon:"🗣️" },
+  { id:7,  name:"Technique/Précis",  icon:"⚙️" },
+  { id:8,  name:"Terrain/Dynamique", icon:"🏃" },
+  { id:9,  name:"Stratégique",       icon:"♟️" },
+  { id:10, name:"Littéraire",        icon:"📖" },
+];
+
+const SECTEURS = [
+  { id:1, name:"Tech & Numérique",             icon:"💻" },
+  { id:2, name:"Santé & Médical",               icon:"🩺" },
+  { id:3, name:"Business & Économie",           icon:"💼" },
+  { id:4, name:"Sciences & Recherche",          icon:"🔬" },
+  { id:5, name:"Arts, Lettres & Communication", icon:"🎭" },
+  { id:6, name:"Terrain, Nature & Env.",        icon:"🌿" },
+];
+
+const QUIZ_QUESTIONS = [
+  {
+    q: "Quelles matières tu préfères le plus au lycée ?",
+    options: [
+      { text: "Maths & Physique", icon:"🔢", vals: { note_maths:16, note_sciences:15, note_francais:11, note_eco:11, serie_bac:2 } },
+      { text: "Français & Histoire", icon:"📜", vals: { note_francais:16, note_histoire:15, note_maths:10, note_sciences:10, serie_bac:1 } },
+      { text: "SVT & Sciences Nat.", icon:"🌱", vals: { note_sciences:16, note_maths:14, note_francais:12, note_eco:11, serie_bac:3 } },
+      { text: "Économie & Comptabilité", icon:"📈", vals: { note_eco:16, note_maths:13, note_francais:13, note_sciences:10, serie_bac:4 } },
+    ]
+  },
+  {
+    q: "Comment tu te comportes dans un groupe de travail ?",
+    options: [
+      { text: "Je prends les décisions", icon:"👑", vals: { profil:3 } },
+      { text: "Je trouve des solutions créatives", icon:"💡", vals: { profil:2 } },
+      { text: "J'analyse et je propose des données", icon:"📊", vals: { profil:1 } },
+      { text: "Je m'assure que tout le monde va bien", icon:"🤝", vals: { profil:4 } },
+    ]
+  },
+  {
+    q: "Quel type de travail t'attire le plus ?",
+    options: [
+      { text: "Travailler sur des ordinateurs / systèmes", icon:"💻", vals: { secteur:1, profil:7 } },
+      { text: "Aider, soigner, enseigner les autres", icon:"❤️", vals: { secteur:2, profil:4 } },
+      { text: "Gérer des projets, entreprises", icon:"🏢", vals: { secteur:3, profil:3 } },
+      { text: "Travailler en plein air / terrain", icon:"🌍", vals: { secteur:6, profil:8 } },
+    ]
+  },
+  {
+    q: "Quelle activité te rendrait le plus fier(e) ?",
+    options: [
+      { text: "Créer une startup qui change le Gabon", icon:"🚀", vals: { secteur:1, profil:9 } },
+      { text: "Soigner des patients dans un hôpital", icon:"🏥", vals: { secteur:2, profil:4 } },
+      { text: "Écrire ou communiquer pour des milliers de gens", icon:"✍️", vals: { secteur:5, profil:6 } },
+      { text: "Construire des bâtiments ou infrastructures", icon:"🏗️", vals: { secteur:4, profil:7 } },
+    ]
+  },
+  {
+    q: "Où te vois-tu dans 10 ans ?",
+    options: [
+      { text: "Directeur / Responsable dans une grande entreprise", icon:"👔", vals: { secteur:3, profil:3 } },
+      { text: "Expert reconnu dans mon domaine technique", icon:"🎖️", vals: { secteur:4, profil:5 } },
+      { text: "Entrepreneur à la tête de mon business", icon:"💰", vals: { secteur:3, profil:9 } },
+      { text: "Fonctionnaire ou agent de l'État gabonais", icon:"🏛️", vals: { secteur:4, profil:1 } },
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let mode = null;
+let currentStep = 1;
+let quizStep = 0;
+let quizAnswers = {};
+let selectedProfil = null;
+let selectedSecteur = null;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  updateProgress();
+}
+
+function setMode(m) {
+  mode = m;
+  if (m === 'notes') {
+    goTo('step2a');
+  } else {
+    quizStep = 0;
+    quizAnswers = {};
+    renderQuiz();
+    goTo('step2b');
+  }
+  buildProfileGrid();
+  buildSecteurGrid();
+}
+
+function updateProgress() {
+  const active = document.querySelector('.card.active')?.id;
+  const stepMap = { step1:1, step2a:2, step2b:2, step3:3, step4:4 };
+  const s = stepMap[active] || 1;
+
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'step-dot ' + (i < s ? 'done' : i === s ? 'active' : 'pending');
+    dot.textContent = i < s ? '✓' : i;
+    if (i < 4) {
+      document.getElementById('line' + i).querySelector('.step-line-fill').classList.toggle('done', i < s);
+    }
+  }
+}
+
+function step3Back() {
+  if (mode === 'notes') goTo('step2a');
+  else goTo('step2b');
+}
+
+function restart() {
+  mode = null; quizStep = 0; quizAnswers = {};
+  selectedProfil = null; selectedSecteur = null;
+  goTo('step1');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDERS
+// ─────────────────────────────────────────────────────────────────────────────
+function updateSlider(el, valId) {
+  document.getElementById(valId).textContent = el.value;
+  const pct = (el.value / 20) * 100;
+  el.style.setProperty('--pct', pct + '%');
+}
+
+document.querySelectorAll('input[type="range"]').forEach(el => {
+  updateSlider(el, 'val_' + el.id.replace('note_', ''));
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────────────────────────────────────
+function renderQuiz() {
+  const q = QUIZ_QUESTIONS[quizStep];
+  const answered = quizAnswers[quizStep];
+  const html = `
+    <div class="quiz-progress">Question ${quizStep + 1} / ${QUIZ_QUESTIONS.length}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">
+      ${q.options.map((o, i) => `
+        <button class="quiz-opt ${answered === i ? 'selected' : ''}" onclick="selectQuizOpt(${i})">
+          <span class="opt-icon">${o.icon}</span>
+          <span>${o.text}</span>
+        </button>
+      `).join('')}
+    </div>`;
+  document.getElementById('quizContent').innerHTML = html;
+  document.getElementById('quizBack').style.visibility = quizStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('quizNext').textContent = quizStep === QUIZ_QUESTIONS.length - 1 ? 'Terminer →' : 'Suivant →';
+}
+
+function selectQuizOpt(i) {
+  quizAnswers[quizStep] = i;
+  renderQuiz();
+}
+
+function quizNext() {
+  if (quizAnswers[quizStep] === undefined) {
+    alert('Sélectionne une réponse pour continuer !');
+    return;
+  }
+  if (quizStep < QUIZ_QUESTIONS.length - 1) {
+    quizStep++;
+    renderQuiz();
+  } else {
+    applyQuizAnswers();
+    goTo('step3');
+  }
+}
+
+function quizPrev() {
+  if (quizStep > 0) { quizStep--; renderQuiz(); }
+  else { goTo('step1'); }
+}
+
+function applyQuizAnswers() {
+  let maths = 10, francais = 10, sciences = 10, eco = 10, histoire = 10, anglais = 10, serie = 2;
+  let profil = null, secteur = null;
+
+  for (let qi = 0; qi < QUIZ_QUESTIONS.length; qi++) {
+    const ans = quizAnswers[qi];
+    if (ans === undefined) continue;
+    const vals = QUIZ_QUESTIONS[qi].options[ans].vals;
+    if (vals.note_maths) maths = vals.note_maths;
+    if (vals.note_francais) francais = vals.note_francais;
+    if (vals.note_sciences) sciences = vals.note_sciences;
+    if (vals.note_eco) eco = vals.note_eco;
+    if (vals.serie_bac) serie = vals.serie_bac;
+    if (vals.profil) profil = vals.profil;
+    if (vals.secteur) secteur = vals.secteur;
+  }
+
+  // Sync form sliders
+  const setSlider = (id, val, valId) => {
+    const el = document.getElementById(id);
+    if (el) { el.value = val; updateSlider(el, valId); }
+  };
+  setSlider('note_maths', maths, 'val_maths');
+  setSlider('note_francais', francais, 'val_francais');
+  setSlider('note_sciences', sciences, 'val_sciences');
+  setSlider('note_eco', eco, 'val_eco');
+  setSlider('note_histoire', histoire, 'val_histoire');
+  setSlider('note_anglais', anglais, 'val_anglais');
+
+  const serieEl = document.getElementById('serie_bac');
+  if (serieEl) serieEl.value = serie;
+
+  if (profil) { selectedProfil = profil; }
+  if (secteur) { selectedSecteur = secteur; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFIL & SECTEUR GRIDS
+// ─────────────────────────────────────────────────────────────────────────────
+function buildProfileGrid() {
+  document.getElementById('profilGrid').innerHTML = PROFILS.map(p => `
+    <button class="quiz-opt ${selectedProfil === p.id ? 'selected' : ''}" onclick="selectProfil(${p.id})">
+      <span class="opt-icon">${p.icon}</span><span>${p.name}</span>
+    </button>`).join('');
+}
+
+function buildSecteurGrid() {
+  document.getElementById('secteurGrid').innerHTML = SECTEURS.map(s => `
+    <button class="quiz-opt ${selectedSecteur === s.id ? 'selected' : ''}" onclick="selectSecteur(${s.id})">
+      <span class="opt-icon">${s.icon}</span><span>${s.name}</span>
+    </button>`).join('');
+}
+
+function selectProfil(id) {
+  selectedProfil = id;
+  buildProfileGrid();
+}
+
+function selectSecteur(id) {
+  selectedSecteur = id;
+  buildSecteurGrid();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODÈLE ML (Random Forest simulé côté client)
+// ─────────────────────────────────────────────────────────────────────────────
+function predict() {
+  if (!selectedProfil || !selectedSecteur) {
+    alert('Sélectionne ton profil de personnalité et ton secteur de préférence !');
+    return;
+  }
+
+  const maths    = parseFloat(document.getElementById('note_maths').value);
+  const francais = parseFloat(document.getElementById('note_francais').value);
+  const sciences = parseFloat(document.getElementById('note_sciences').value);
+  const eco      = parseFloat(document.getElementById('note_eco').value);
+  const histoire = parseFloat(document.getElementById('note_histoire').value);
+  const anglais  = parseFloat(document.getElementById('note_anglais').value);
+  const serie    = parseInt(document.getElementById('serie_bac').value);
+  const profil   = selectedProfil;
+  const secteur  = selectedSecteur;
+  const moy      = (maths + francais + sciences + eco + histoire + anglais) / 6;
+
+  // Scores par filière (règles expertes simulant Random Forest)
+  const scores = {};
+  for (let id = 1; id <= 20; id++) scores[id] = 0;
+
+  // Notes
+  scores[3]  += maths * 1.8 + sciences * 1.8;
+  scores[4]  += sciences * 2.2 + maths * 1.2 + (moy > 13 ? 15 : 0);
+  scores[5]  += maths * 2.0 + sciences * 1.5;
+  scores[6]  += maths * 2.2 + sciences * 1.2;
+  scores[11] += sciences * 2.0 + maths * 1.3;
+  scores[13] += sciences * 1.5;
+  scores[1]  += francais * 1.5 + eco * 1.5;
+  scores[2]  += francais * 2.2 + histoire * 1.5;
+  scores[10] += francais * 1.8 + histoire * 1.2;
+  scores[18] += francais * 1.5 + histoire * 1.5;
+  scores[7]  += eco * 2.0 + maths * 1.2;
+  scores[17] += eco * 2.0 + maths * 1.5;
+  scores[9]  += francais * 1.5 + eco * 1.2;
+  scores[8]  += eco * 1.5 + francais * 1.2;
+  scores[20] += eco * 1.5 + maths * 1.2 + moy * 0.5;
+  scores[16] += eco * 1.5 + maths * 1.0;
+  scores[15] += francais * 1.2 + anglais * 1.5;
+  scores[14] += maths * 1.5 + francais * 1.2;
+  scores[12] += sciences * 1.5;
+  scores[19] += francais * 1.5 + anglais * 1.5;
+
+  // Série bac
+  const serieBoosters = {
+    1: [1, 2, 10, 18, 19],
+    2: [3, 5, 6, 11, 14],
+    3: [4, 12, 13, 11, 3],
+    4: [7, 17, 8, 20, 16],
+    5: [5, 6, 16],
+  };
+  (serieBoosters[serie] || []).forEach(id => { scores[id] += 20; });
+
+  // Profil personnalité
+  const profilBoosters = {
+    1: [1,3,6,11,17], 2: [9,14,20], 3: [8,20,7],
+    4: [4,10,8], 5: [3,6,11,13,12], 6: [2,9,10,19],
+    7: [5,6,14,17], 8: [11,12,13,16], 9: [7,8,20,1], 10: [2,9,10,18],
+  };
+  (profilBoosters[profil] || []).forEach(id => { scores[id] += 25; });
+
+  // Secteur
+  const secteurBoosters = {
+    1: [6,20], 2: [4], 3: [7,8,17,20], 4: [3,5,11], 5: [2,9,10,18,15], 6: [12,13,16],
+  };
+  (secteurBoosters[secteur] || []).forEach(id => { scores[id] += 30; });
+
+  // Noise léger (simuler la stochasticité RF)
+  for (let id in scores) scores[id] += Math.random() * 5;
+
+  // Tri et top 3
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const total = sorted.slice(0, 5).reduce((s, e) => s + e[1], 0);
+  const top3 = sorted.slice(0, 3).map(([id, score]) => ({
+    id: parseInt(id),
+    pct: Math.round((score / total) * 100)
+  }));
+
+  showResults(top3, { maths, francais, sciences, eco, moy: Math.round(moy * 10) / 10, profil, secteur, serie });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AFFICHAGE RÉSULTATS
+// ─────────────────────────────────────────────────────────────────────────────
+function showResults(top3, data) {
+  const recoList = document.getElementById('recoList');
+  const ranks = ['rank-1', 'rank-2', 'rank-3'];
+  const medals = ['🥇', '🥈', '🥉'];
+
+  recoList.innerHTML = top3.map((r, i) => {
+    const f = FILIERES[r.id];
+    return `
+    <div class="reco-card ${ranks[i]}" style="animation-delay:${i * 0.1}s">
+      <div class="reco-rank">${medals[i]}</div>
+      <div class="reco-info">
+        <div class="reco-name">${f.emoji} ${f.name}</div>
+        <div class="reco-meta">
+          <span>⏱️ ${f.duree}</span>
+          <span>🏫 ${f.etabs.length} établissements</span>
+        </div>
+        <div class="conf-bar-wrap"><div class="conf-bar" data-w="${r.pct}"></div></div>
+      </div>
+      <div class="reco-pct">${r.pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Établissements de la filière n°1
+  const top1 = FILIERES[top3[0].id];
+  document.getElementById('etablissementsList').innerHTML =
+    top1.etabs.map(e => `<span class="etab-tag">🏫 ${e}</span>`).join('');
+
+  // Profile summary
+  const profilName  = PROFILS.find(p => p.id === data.profil)?.name || '-';
+  const secteurName = SECTEURS.find(s => s.id === data.secteur)?.name || '-';
+  const serieNames  = {1:'Série A',2:'Série C',3:'Série D',4:'Série G2',5:'Série F'};
+  document.getElementById('profileSummary').innerHTML = `
+    <div class="summary-item"><span class="summary-icon">📊</span><div class="summary-label">Moyenne</div><div class="summary-value">${data.moy}/20</div></div>
+    <div class="summary-item"><span class="summary-icon">🧠</span><div class="summary-label">Profil</div><div class="summary-value">${profilName}</div></div>
+    <div class="summary-item"><span class="summary-icon">🎯</span><div class="summary-label">Secteur</div><div class="summary-value">${secteurName}</div></div>
+  `;
+
+  goTo('step4');
+
+  // Animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.conf-bar').forEach(bar => {
+      bar.style.width = bar.dataset.w + '%';
+    });
+  }, 400);
+}
+
+function share() {
+  const top1 = document.querySelector('.reco-card.rank-1 .reco-name')?.textContent || '';
+  const text = `🎓 OrientaGabon m'a recommandé : ${top1}\n\nDécouvre ta filière idéale au Gabon avec l'IA ! 🇬🇦\n\nProjet de Paul Allan Junior MEYE SIKA`;
+  if (navigator.share) {
+    navigator.share({ title: 'OrientaGabon — Mon résultat', text });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('Résultat copié ! Partage-le sur tes réseaux 🚀'));
+  }
+}
+
+// Init
+buildProfileGrid();
+buildSecteurGrid();
+updateProgress();
+</script>
+</body>
+</html>
